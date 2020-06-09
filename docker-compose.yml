@@ -1,0 +1,24 @@
+version: "3"
+services:
+  nginx:     # コンテナネーム(注1)
+    build: ./nginx  # Dockerfileの場所
+    #ports:
+    #  - "80:80"  # EC2が公開しているポート番号:コンテナのポート番号
+    volumes:
+      - ./html:/usr/share/nginx/html
+  https-portal:
+    image: steveltn/https-portal:1
+    depends_on:
+      - nginx
+    links:
+      - nginx
+    ports:
+      - 80:80
+      - 443:443
+    restart: always
+    volumes:
+      - ./ssl_certs:/var/lib/https-portal
+    environment:
+      DOMAINS: 'hibinet.com -> http://nginx:80'
+      STAGE: production
+      CLIENT_MAX_BODY_SIZE: 64M
